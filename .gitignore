@@ -35,3 +35,9 @@ coverage
 # Vitest
 __screenshots__/
 .dmux/
+
+# Tauri build artifacts
+src-tauri/target/
+
+# IntelliJ
+*.iml

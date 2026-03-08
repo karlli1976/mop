@@ -31,18 +31,20 @@ cd src-tauri && cargo build --release
 
 **Stack**: Vue 3 (Composition API) + Vite 7 + vanilla JavaScript (no TypeScript). Path alias `@` maps to `src/`.
 
-**Routing**: Hash-based routing implemented in `App.vue` (no vue-router). Routes: `#/practice` and `#/stats`. Navigation to `#/stats` is blocked while a session is active.
+**Routing**: Hash-based routing implemented in `App.vue` (no vue-router). Routes: `#/practice`, `#/fractions`, and `#/stats`. Navigation away from the active route is blocked while a session is active.
 
-**State Management**: Simple reactive store in `src/store.js` using Vue's `reactive()`. Contains session state (`isSessionActive`) shared between `App.vue` (controls nav) and `PracticeView.vue` (toggles on start/end).
+**State Management**: Simple reactive store in `src/store.js` using Vue's `reactive()`. Contains `isSessionActive` (boolean) and `activeSessionType` (`'mixed' | 'fraction' | null`), shared between `App.vue` (controls nav) and the practice views.
 
-**Data Persistence**: All session data stored in browser localStorage under key `mop:sessions`. Each entry has `{ date, timeSec, accuracy, startedAt }`.
+**Data Persistence**: Mixed ops sessions stored in localStorage under `mop:sessions`; fraction sessions under `mop:fraction-sessions`. Each entry has `{ date, timeSec, accuracy, startedAt }`.
 
 **Session Lifecycle**: Problems are generated on mount. User clicks Start (expressions revealed, timer begins) -> answers problems -> clicks End (timer stops, results shown, session saved to localStorage). Clicking "New Set" resets.
 
 ### Key Files
 
-- `src/utils/generator.js` - Problem generation algorithm. Exports `generateSet(count)` and `formatSeconds(sec)`. Generates expressions with 5 two-digit numbers and all 4 operators. Uses a retry loop (up to 2000 attempts) with a deterministic fallback builder (`a * b / c + d - e`) to guarantee valid output.
-- `src/views/PracticeView.vue` - Main practice interface with timer, problem display, and answer input
+- `src/utils/generator.js` - Mixed ops generation. Exports `generateSet(count)` and `formatSeconds(sec)`. Generates expressions with 5 two-digit numbers and all 4 operators. Uses a retry loop (up to 2000 attempts) with a deterministic fallback builder (`a * b / c + d - e`) to guarantee valid output.
+- `src/utils/fractionGenerator.js` - Fraction problem generation. Exports `generateFractionSet(count)`, `parseFraction(input)`, `fractionsEqual(f1, f2)`, `formatFraction(f)`, and re-exports `formatSeconds`. Same retry/fallback pattern; fractions are `{ num, den }` objects kept in simplified form.
+- `src/views/PracticeView.vue` - Mixed ops practice interface with timer, problem display, and answer input
+- `src/views/FractionView.vue` - Fraction practice interface; answers accepted as `"n/d"` or whole numbers
 - `src/views/StatsView.vue` - Historical session data with SVG-based accuracy/time charts
 - `vite.config.js` - Uses `base: './'` for file:// protocol compatibility
 
